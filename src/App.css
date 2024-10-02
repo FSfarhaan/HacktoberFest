@@ -31,6 +31,10 @@
   color: #61dafb;
 }
 
+.custom-placeholder::placeholder {
+  color: #183717; /* Replace with the desired color */
+}
+
 @keyframes App-logo-spin {
   from {
     transform: rotate(0deg);

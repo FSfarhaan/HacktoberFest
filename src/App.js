@@ -12,7 +12,6 @@ const App = () => {
   return (
     <div className="App"> {/* Apply the .App class here */}
       <BrowserRouter>
-        <NavBar /> {/* Include the NavBar here, only once */}
         <Routes>
           <Route path="/" element={<Home />} />  {/* Set Home as the main route */}
           <Route path="/auth" element={<AuthForm />} />  {/* Authentication route */}

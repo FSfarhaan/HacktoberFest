@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from 'axios';
+import NavBar from "./Nav";
 
 const Home = () => {
   const navigate = useNavigate();
   const [currentPr, setCurrentPr] = useState(0);
+  const [dbPR, setdbPR] = useState(0);
   const [newPrNumber, setNewPrNumber] = useState('');
   const [message, setMessage] = useState('');
 
@@ -21,79 +23,86 @@ const Home = () => {
     }
   };
 
+  const fetchDBPR = async () => {
+    const token = localStorage.getItem('token');
+    const response = await axios.post('http://localhost:4000/getdbPR', { token });
+    const dbPr = response.data.dbPr;
+    if(!dbPr) return;
+    setdbPR(dbPr);
+  };
+
   useEffect(() => {
+    const token = localStorage.getItem('token');
+    if(!token){
+      navigate('/auth');
+      return ;
+    } 
+
     fetchCurrentPr();
-  }, []);
+    fetchDBPR();
+  });
 
   // Function to handle PR update
   const handleUpdatePr = async () => {
-    if (!newPrNumber) {
-      setMessage('Please provide a new PR number.');
-      return;
+    // if (!newPrNumber) {
+    //   setMessage('Please provide a new PR number.');
+    //   return;
+    // }
+    if(dbPR < currentPr) {
+      const token = localStorage.getItem('token');
+      // if(newPrNumber <= currentPr) {
+      //   setMessage('You can’t update PR.');
+      //   return;
+      // } 
+  
+      try {
+        const response = await axios.post('http://localhost:4000/updatePR', {
+          prNo: currentPr, // Send the new PR number
+          token
+        });
+        setMessage(response.data.message);
+        fetchDBPR(); // Refresh the PR number after update
+      } catch (error) {
+        setMessage(error.response?.data?.message || 'An error occurred');
+      }
+    } else {
+      setMessage('Everything upto date')
     }
-    if(newPrNumber <= currentPr) {
-      setMessage('You cant update PR')
-      return;
-    } 
-      
-    const token = localStorage.getItem('token');
-
-    try {
-      const response = await axios.post('http://localhost:4000/updatePR', {
-        prNo: newPrNumber, // Send the new PR number
-        token
-      });
-      setMessage(response.data.message);
-      fetchCurrentPr(); // Refresh the PR number after update
-      setNewPrNumber(''); // Clear input after submission
-    } catch (error) {
-      setMessage(error.response?.data?.message || 'An error occurred');
-    }
+    
   };
 
   return (
-    <div className="bg-[#50DA4C] min-h-screen flex flex-col items-center justify-center">
-      <h1 className="text-4xl font-bold mb-1 text-white">Welcome to Hacktoberfest Tracker!</h1>
-      <p className="text-lg mb-6 text-white">
-        Join us in celebrating open source contributions this Hacktoberfest! 
-        Track your pull requests and share your progress with the community.
-      </p>
+    <>
+      <NavBar/>
+      <div className="flex flex-col items-center justify-center p-6">
+        <h1 className="text-3xl sm:text-5xl font-extrabold mb-4 sm:mb-6 text-center p-4" style={{color: "#183717"}}>Hacktoberfest PR Tracker</h1>
+        <p className="text-xl mb-8 text-white max-w-2xl text-center" style={{color: "#183717"}}>
+          Celebrate open source contributions this Hacktoberfest! Track your pull requests and share your progress with the community.
+        </p>
 
-      <div className="bg-[#319C2E] shadow-md rounded-lg p-8 max-w-md w-full mb-6">
-        <h2 className="text-2xl font-bold mb-4 text-white text-left">Your Hacktoberfest PR:</h2>
+        <div className="bg-white shadow-lg rounded-lg p-6 max-w-md w-full mb-8">
+          <h2 className="text-3xl font-bold mb-4 text-green-800 text-left">Your Current Hacktoberfest PR:</h2>
 
-        {currentPr !==0? (
-          <>
-            <h1 className="text-lg font-semibold text-white text-left">Your current PR number is:</h1>
-            <p className="text-xl font-bold text-blue-200 text-left">{currentPr}</p>
-          </>
-        ) : (
-          <p className="text-red-500 text-left">{message}</p>
-        )}
-      </div>
+          <h3 className="text-lg font-semibold text-green-600 text-left">Your accepted PR count:</h3>
+          <p className="text-4xl font-bold text-green-500 text-left">{currentPr}</p>
 
-      <div className="bg-[#319C2E] shadow-md rounded-lg p-8 max-w-md w-full">
-        <h2 className="text-2xl font-bold mb-4 text-white text-left">Update Your PR Number:</h2>
+          <h3 className="text-lg font-semibold text-green-600 text-left">Your DB PR count:</h3>
+          <p className="text-4xl font-bold text-green-500 text-left">{dbPR}</p>
 
-          <input
-            type="number"
-            value={newPrNumber}
-            onChange={(e) => setNewPrNumber(e.target.value)}
-            placeholder="Enter your new PR number"
-            className="w-full p-2 border border-gray-300 rounded-md mb-4"
-            required
-          />
           <button
             onClick={handleUpdatePr}
-            className="w-full bg-[#183717] text-white p-2 rounded-md hover:bg-green-600 transition duration-300"
+            className="w-full text-white p-3 rounded-md hover:bg-green-700 transition duration-300 text-lg font-bold"
+            style={{background: "#183717", marginTop: "1rem"}}
           >
             Update PR
           </button>
 
-          {message && <p className="mt-4 text-red-500 text-center">{message}</p>}
+          {message && <p className="mt-4 text-red-500 text-center text-lg">{message}</p>}
+        </div>
 
+       
       </div>
-    </div>
+    </>
   );
 };
 

@@ -66,7 +66,7 @@ const transformPRs=(nodes)=>{
     // PRs in October AND Public Repo
     const filter1=nodes.filter((each)=>{
         const timeStamp=new Date(each.createdAt);
-        return ( timeStamp.getFullYear()=="2023"
+        return ( timeStamp.getFullYear()=="2024"
               &&timeStamp.getMonth()=="9") 
               &&
               (each.repository.isPrivate==false);

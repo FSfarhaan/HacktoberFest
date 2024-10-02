@@ -38,7 +38,7 @@ const userSchema = new mongoose.Schema({
   password: { type: String, required: true },
   token: { type: String, required: true },
   year: { type: String, required: true },
-  prNumber: { type: Number },
+  // prNumber: { type: Number },
   prDetails: {
     type: [{ type: Date }]
   }
@@ -137,6 +137,18 @@ app.post("/hacktoberfest", async (req, res) => {
       .json({ message: "Error fetching Hacktoberfest data: " + error.message });
   }
 });
+
+app.post("/getdbPR", async (req, res) => {
+  const token = req.body.token;
+  let user;
+  try {
+    user = await User.findOne({ token });
+    if (!user) return res.status(404).json({ message: "User not found" });
+    return res.status(200).json({ dbPr: user.prDetails.length });
+  } catch(err) {
+    return res.status(500).json({ message: "Error fetching DB PR: " + err.message });
+  }
+})
 
 
 app.post("/updatePR", async (req, res) => {
