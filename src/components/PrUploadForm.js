@@ -1,87 +1,87 @@
 // src/components/PrUploadForm.js
-import React, { useState, useEffect } from "react";
-import { uploadPrNumber } from "../api"; // Adjust this import as necessary
-import NavBar from "./Nav";
-import axios from "axios";
+import React, { useState, useEffect } from 'react';
+import { uploadPrNumber } from '../api'; // Ensure this function is correctly set up to handle both actions
+import NavBar from './Nav';
+import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 const PrUploadForm = () => {
-  const [username, setUsername] = useState("");
-  const [prNumber, setPrNumber] = useState("");
-  const [message, setMessage] = useState("");
-  const [pr, setPr] = useState(null);
+  const [username, setUsername] = useState('');
+  const [currentPr, setCurrentPr] = useState(null);
+  const [newPrNumber, setNewPrNumber] = useState('');
+  const [message, setMessage] = useState('');
+  const navigate = useNavigate();
 
-  // Fetch current PR number when the component mounts
-  const fetchData = async () => {
-    const token = localStorage.getItem("token");
+  // Fetch the current PR number from the server when the component mounts
+  const fetchCurrentPr = async () => {
+    const token = localStorage.getItem('token');
 
     try {
-      const response = await axios.post("http://localhost:4000/hacktoberfest", {
-        token,
-      });
-      setPr(response.data.pr); // Adjust based on your API response
+      const response = await axios.post('http://localhost:4000/hacktoberfest', { token });
+      setCurrentPr(response.data.pr); // Adjust based on your API response
     } catch (error) {
       console.error(error);
+      setMessage('Error fetching PR number.');
     }
   };
 
   useEffect(() => {
-    fetchData();
+    fetchCurrentPr();
   }, []);
 
-  // Function to upload the PR number
-  const handleUpload = async () => {
-    if (!username || !prNumber) {
-      setMessage("Please provide both username and PR number.");
+  // Function to handle PR number update
+  const handleUpdatePr = async (e) => {
+    e.preventDefault();
+    if (!newPrNumber) {
+      setMessage('Please provide a new PR number.');
       return;
     }
 
     try {
-      const data = await uploadPrNumber(username, prNumber);
+      const data = await uploadPrNumber(username, newPrNumber); // Call the upload function
       setMessage(data.message);
-      fetchData(); // Refresh the PR number after upload
+      fetchCurrentPr(); // Refresh the PR number after update
+      setNewPrNumber(''); // Clear input field after submission
     } catch (error) {
-      setMessage(error.response?.data?.message || "An error occurred");
+      setMessage(error.response?.data?.message || 'An error occurred');
     }
   };
 
   return (
     <>
       <NavBar />
-      <div className="bg-gray-100 min-h-screen flex flex-col items-center justify-center">
-        <div className="bg-white shadow-md rounded-lg p-8 max-w-md w-full">
-          <h2 className="text-2xl font-bold mb-6 text-center">
-            Upload PR Number
-          </h2>
+      <div className="bg-[#50DA4C] min-h-screen flex flex-col items-center justify-center">
+        <div className="bg-[#319C2E] shadow-md rounded-lg p-8 max-w-md w-full">
+          <h2 className="text-2xl font-bold mb-6 text-center text-white">Your Hacktoberfest PR : </h2>
 
-          <h1 className="text-lg font-semibold">Your Hacktoberfest PR is:</h1>
-          <p className="text-xl font-bold text-blue-600">{pr}</p>
+          {currentPr ? (
+            <>
+              <h1 className="text-lg font-semibold text-white">Your current PR number is:</h1>
+              <p className="text-xl font-bold text-blue-200">{currentPr}</p>
+            </>
+          ) : (
+            <p className="text-red-500">No current PR number found.</p>
+          )}
 
-          <div className="mt-6">
-            <input
-              type="text"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              placeholder="Enter your username"
-              className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-blue-300 mb-4"
-            />
+          <form onSubmit={handleUpdatePr} className="mt-6">
+            <h2 className="text-lg font-semibold mb-4 text-white">Update PR Number:</h2>
             <input
               type="number"
-              value={prNumber}
-              onChange={(e) => setPrNumber(e.target.value)}
-              placeholder="Enter your PR number"
-              className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-blue-300 mb-4"
+              value={newPrNumber}
+              onChange={(e) => setNewPrNumber(e.target.value)}
+              placeholder="Enter your new PR number"
+              className="w-full p-2 border border-gray-300 rounded-md mb-4"
+              required
             />
             <button
-              onClick={handleUpload}
-              className="w-full bg-blue-500 text-white p-2 rounded-md hover:bg-blue-600 transition duration-300"
+              type="submit"
+              className="w-full bg-[#183717] text-white p-2 rounded-md hover:bg-green-600 transition duration-300"
             >
-              Upload PR Number
+              Update PR Number
             </button>
-          </div>
+          </form>
 
-          {message && (
-            <p className="mt-4 text-red-500 text-center">{message}</p>
-          )}
+          {message && <p className="mt-4 text-red-500 text-center">{message}</p>}
         </div>
       </div>
     </>

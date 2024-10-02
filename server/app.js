@@ -20,7 +20,8 @@ app.use(express.urlencoded({ extended: true }));
 // Connect to MongoDB
 mongoose
   .connect(
-    "mongodb+srv://varad:varad6862@cluster0.0suvvd6.mongodb.net/hactoberfest",
+    // "mongodb+srv://varad:varad6862@cluster0.0suvvd6.mongodb.net/hactoberfest",
+    "mongodb://localhost:27017/CSI",
     {
       // Use environment variable for the URI
       useNewUrlParser: true,
