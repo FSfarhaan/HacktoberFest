@@ -1,6 +1,7 @@
 // src/components/PrUploadForm.js
 import React, { useState, useEffect } from "react";
 import { uploadPrNumber } from "../api"; // Adjust this import as necessary
+import { updatePr } from "../api";
 import NavBar from "./Nav";
 import axios from "axios";
 
@@ -8,7 +9,7 @@ const PrUploadForm = () => {
   const [username, setUsername] = useState("");
   const [prNumber, setPrNumber] = useState("");
   const [message, setMessage] = useState("");
-  const [pr, setPr] = useState(null);
+  const [pr, setPr] = useState(0);
 
   // Fetch current PR number when the component mounts
   const fetchData = async () => {
@@ -29,20 +30,31 @@ const PrUploadForm = () => {
   }, []);
 
   // Function to upload the PR number
-  const handleUpload = async () => {
-    if (!username || !prNumber) {
-      setMessage("Please provide both username and PR number.");
-      return;
-    }
+  // const handleUpload = async () => {
+  //   // if (!username || !prNumber) {
+  //   //   setMessage("Please provide both username and PR number.");
+  //   //   return;
+  //   // }
 
+  //   try {
+  //     const data = await uploadPrNumber(username, prNumber);
+  //     setMessage(data.message);
+  //     fetchData(); // Refresh the PR number after upload
+  //   } catch (error) {
+  //     setMessage(error.response?.data?.message || "An error occurred");
+  //   }
+  // };
+
+  const handleUpdatePR = async () => {
+    const token = localStorage.getItem("token");
+    if(!token) return;
     try {
-      const data = await uploadPrNumber(username, prNumber);
-      setMessage(data.message);
-      fetchData(); // Refresh the PR number after upload
-    } catch (error) {
-      setMessage(error.response?.data?.message || "An error occurred");
+      const response = await updatePr(pr, token);
+      console.log(response);
+    } catch (err) {
+      setMessage(err.response?.data?.message || "An error occurred");
     }
-  };
+  }
 
   return (
     <>
@@ -57,7 +69,7 @@ const PrUploadForm = () => {
           <p className="text-xl font-bold text-blue-600">{pr}</p>
 
           <div className="mt-6">
-            <input
+            {/* <input
               type="text"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
@@ -70,12 +82,12 @@ const PrUploadForm = () => {
               onChange={(e) => setPrNumber(e.target.value)}
               placeholder="Enter your PR number"
               className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-blue-300 mb-4"
-            />
+            /> */}
             <button
-              onClick={handleUpload}
+              onClick={handleUpdatePR}
               className="w-full bg-blue-500 text-white p-2 rounded-md hover:bg-blue-600 transition duration-300"
             >
-              Upload PR Number
+              Update PR
             </button>
           </div>
 

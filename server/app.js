@@ -7,6 +7,7 @@ const cors = require("cors"); // Import CORS
 
 const fetchNodeID = require("./helpers/fetchNodeID");
 const { fetchPRHistory, transformPRs } = require("./helpers/hacktoberfest");
+const { type } = require("@testing-library/user-event/dist/type");
 
 dotenv.config();
 
@@ -20,7 +21,8 @@ app.use(express.urlencoded({ extended: true }));
 // Connect to MongoDB
 mongoose
   .connect(
-    "mongodb+srv://varad:varad6862@cluster0.0suvvd6.mongodb.net/hactoberfest",
+    // "mongodb+srv://varad:varad6862@cluster0.0suvvd6.mongodb.net/hactoberfest",
+    "mongodb://localhost:27017/CSI",
     {
       // Use environment variable for the URI
       useNewUrlParser: true,
@@ -35,14 +37,18 @@ const userSchema = new mongoose.Schema({
   username: { type: String, required: true, unique: true },
   password: { type: String, required: true },
   token: { type: String, required: true },
+  year: { type: String, required: true },
   prNumber: { type: Number },
+  prDetails: {
+    type: [{ type: Date }]
+  }
 });
 
 const User = mongoose.model("User", userSchema);
 
 // Signup route
 app.post("/signup", async (req, res) => {
-  const { username, password, token } = req.body;
+  const { username, password, year, token } = req.body;
 
   // Check if user already exists
   const existingUser = await User.findOne({ username });
@@ -52,7 +58,7 @@ app.post("/signup", async (req, res) => {
 
   // Hash the password before saving
 
-  const newUser = new User({ username, password: password, token });
+  const newUser = new User({ username, password: password, year, token });
 
   try {
     await newUser.save();
@@ -112,8 +118,16 @@ app.post("/hacktoberfest", async (req, res) => {
     const PRHistory = await fetchPRHistory(userNodeID, userToken);
     const transformedPRs = transformPRs(PRHistory);
 
-    console.log("PR History:", PRHistory[5].labels.edges);
-    console.log("Transformed PRs Size:", transformedPRs.size);
+    // console.log(PRHistory);
+    // console.log(transformPRs);
+    
+    // console.log("PR History:", PRHistory[1].labels.edges);
+    // for (const i in PRHistory) {
+    //   console.log(PRHistory[i].repository.repositoryTopics.edges);
+    //   console.log(PRHistory[i].repository.repositoryTopics.edges[0].node.topic);
+    // }
+
+    // console.log("Transformed PRs Size:", transformedPRs.size);
 
     //  sending size
     res.json({ pr: transformedPRs.size });
@@ -123,6 +137,40 @@ app.post("/hacktoberfest", async (req, res) => {
       .json({ message: "Error fetching Hacktoberfest data: " + error.message });
   }
 });
+
+
+app.post("/updatePR", async (req, res) => {
+  const { prNo, token } = req.body;
+  
+  try {
+    // Find the user by token
+    const user = await User.findOne({ token });
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    if (user.prDetails.length < prNo && user.prDetails.length < 4) {
+      for(let i = user.prDetails.length; i < prNo; i++) {
+        user.prDetails.push(Date.now());
+      }
+      await user.save(); 
+      return res.status(200).json({ message: "PR updated successfully", prDetails: user.prDetails });
+    } else {
+      return res.status(400).json({ message: "No PR update needed or prDetails array is full" });
+    }
+
+  } catch (err) {
+    return res.status(500).json({ message: "Error updating PR: " + err.message });
+  }
+});
+
+app.get("/getUsers", async (req, res) => {
+  let users;
+    try {
+      users = await User.find();
+    } catch (err) {return res.status(500).json({message: "Some error ocurred"})} 
+
+    res.json({ users: users.map(user => user.toObject({ getters: true })) });
+});
+
 
 // Basic route for health check
 app.get("/", (req, res) => {

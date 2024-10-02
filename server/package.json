@@ -1,7 +1,6 @@
 {
   "name": "hacktoberfest",
   "version": "1.0.0",
-  "description": "",
   "main": "index.js",
   "scripts": {
     "start": "nodemon app.js"
@@ -19,5 +18,7 @@
     "hacktoberfest": "file:",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.7.0"
-  }
+  },
+  "devDependencies": {},
+  "description": ""
 }

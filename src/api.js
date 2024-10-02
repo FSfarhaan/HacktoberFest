@@ -6,8 +6,8 @@ const api = axios.create({
 });
 
 // Signup function
-export const signup = async (username, password, token) => {
-  const response = await api.post("/signup", { username, password, token });
+export const signup = async (username, password, token, year) => {
+  const response = await api.post("/signup", { username, password, token, year });
   return response.data;
 };
 
@@ -22,3 +22,8 @@ export const uploadPrNumber = async (username, prNumber) => {
   const response = await api.post("/pr", { username, prNumber });
   return response.data;
 };
+
+export const updatePr = async (noOfPr, token) => {
+  const response = await api.post("/updatePR", {noOfPr, token});
+  return response.data;
+}
