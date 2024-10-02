@@ -147,14 +147,17 @@ app.post("/updatePR", async (req, res) => {
     const user = await User.findOne({ token });
     if (!user) return res.status(404).json({ message: "User not found" });
 
-    if (user.prDetails.length < prNo && user.prDetails.length < 4) {
-      for(let i = user.prDetails.length; i < prNo; i++) {
-        user.prDetails.push(Date.now());
+    const currentPr = user.prDetails.length; // Get current PR based on the size of the array
+
+    if (prNo > currentPr && currentPr < 4) { // Ensure PR is greater and the array is not full
+      // Add new timestamps to the array for each new PR increment
+      for(let i = currentPr; i < prNo; i++) {
+        user.prDetails.push(new Date()); // Add current timestamp
       }
       await user.save(); 
       return res.status(200).json({ message: "PR updated successfully", prDetails: user.prDetails });
     } else {
-      return res.status(400).json({ message: "No PR update needed or prDetails array is full" });
+      return res.status(400).json({ message: "No PR update needed or PR array is full" });
     }
 
   } catch (err) {

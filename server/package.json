@@ -17,8 +17,8 @@
     "express": "^4.17.1",
     "hacktoberfest": "file:",
     "jsonwebtoken": "^9.0.2",
-    "mongoose": "^8.7.0"
+    "mongoose": "^8.7.0",
+    "nodemon": "^3.1.7"
   },
-  "devDependencies": {},
   "description": ""
 }

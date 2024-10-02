@@ -1,5 +1,8 @@
 .App {
   text-align: center;
+  background-color: #50DA4C; /* Set background color for the entire app */
+  min-height: 100vh; /* Ensure it covers full viewport height */
+  margin: 0; /* Remove default margin */
 }
 
 .App-logo {
@@ -14,8 +17,8 @@
 }
 
 .App-header {
-  background-color: #282c34;
-  min-height: 100vh;
+  background-color: #183717; /* Navbar color */
+  min-height: 100vh; /* This can be adjusted or removed depending on layout */
   display: flex;
   flex-direction: column;
   align-items: center;

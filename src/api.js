@@ -17,11 +17,12 @@ export const login = async (username, password) => {
   return response.data;
 };
 
-// Upload PR number
-export const uploadPrNumber = async (username, prNumber) => {
-  const response = await api.post("/pr", { username, prNumber });
-  return response.data;
-};
+// Upload or Update PR number
+// export const uploadPrNumber = async (username, prNumber, isUpdating) => {
+//   const endpoint = isUpdating ? "/update/pr" : "/pr"; // Adjust the endpoints as necessary
+//   const response = await api.post(endpoint, { username, prNumber });
+//   return response.data;
+// };
 
 export const updatePr = async (noOfPr, token) => {
   const response = await api.post("/updatePR", {noOfPr, token});
